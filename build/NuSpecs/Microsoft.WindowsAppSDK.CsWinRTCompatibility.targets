@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT License. See LICENSE in the project root for license information. -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- 
+    This targets file is responsible for handling C#/WinRT compatibility settings for WindowsAppSDK.
+    It sets default values for WindowsSdkPackageVersion and checks for appropriate TFM configuration.
+  -->
+
+  <!-- Define minimum required .NET SDK versions for Windows App SDK 1.6+ -->
+  <PropertyGroup>
+    <WindowsAppSDKMinimumNetCoreVersion>6.0.0</WindowsAppSDKMinimumNetCoreVersion>
+  </PropertyGroup>
+  
+  <!-- 
+    Set default WindowsSdkPackageVersion if not already specified.
+    This is specifically needed for AOT compatibility between Windows App SDK 1.6+ and Windows SDK.
+  -->
+  <PropertyGroup Condition="'$(WindowsSdkPackageVersion)' == '' And '$(MSBuildProjectExtension)' == '.csproj'">
+    <!-- Default to the Windows SDK version that is compatible with the current Windows App SDK -->
+    <WindowsSdkPackageVersion>10.0.17763.38</WindowsSdkPackageVersion>
+  </PropertyGroup>
+  
+  <!-- Validate TFM configuration is compatible with Windows App SDK -->
+  <Target Name="WindowsAppSDKValidateTFMCompatibility" BeforeTargets="BeforeBuild" Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+    <PropertyGroup>
+      <_HasWindowsTFM>false</_HasWindowsTFM>
+      <_HasWindowsTFM Condition="$(TargetFramework.Contains('-windows'))">true</_HasWindowsTFM>
+    </PropertyGroup>
+    
+    <Warning 
+      Text="Windows App SDK requires a Windows-specific TFM (e.g., net6.0-windows10.0.19041.0). Your current TargetFramework is '$(TargetFramework)'."
+      Condition="'$(TargetFramework)' != '' And '$(_HasWindowsTFM)' == 'false'" />
+  </Target>
+</Project>
