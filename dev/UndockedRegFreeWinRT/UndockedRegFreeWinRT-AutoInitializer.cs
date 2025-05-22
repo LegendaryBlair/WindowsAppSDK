@@ -23,8 +23,17 @@ namespace Microsoft.Windows.Foundation.UndockedRegFreeWinRTCS
         // Called by WindowsAppRuntimeAutoInitializer.cs
         internal static void AccessWindowsAppSDK()
         {
-            // Set base directory env var for PublishSingleFile support (referenced by SxS redirection)
-            Environment.SetEnvironmentVariable("MICROSOFT_WINDOWSAPPRUNTIME_BASE_DIRECTORY", AppContext.BaseDirectory);
+            try
+            {
+                // Set base directory env var for PublishSingleFile support (referenced by SxS redirection)
+                Environment.SetEnvironmentVariable("MICROSOFT_WINDOWSAPPRUNTIME_BASE_DIRECTORY", AppContext.BaseDirectory);
+            }
+            catch (MissingMethodException)
+            {
+                // When the application is trimmed, Environment.SetEnvironmentVariable might be removed
+                // In this case, we'll fall back to using AppContext.SetData which is less likely to be trimmed
+                AppContext.SetData("MICROSOFT_WINDOWSAPPRUNTIME_BASE_DIRECTORY", AppContext.BaseDirectory);
+            }
 
             // No error handling needed as the target function does nothing (just {return S_OK}).
             // It's the act of calling the function causing the DllImport to load the DLL that
