@@ -4,6 +4,16 @@
   <!-- 
     This targets file is responsible for handling C#/WinRT compatibility settings for WindowsAppSDK.
     It sets default values for WindowsSdkPackageVersion and checks for appropriate TFM configuration.
+    
+    Background:
+    C#/WinRT is used to generate .NET projection assemblies for both Windows App SDK and the Windows SDK.
+    On occasion, these must be updated together to maintain compatibility (e.g., with the introduction of 
+    AOT support in Windows App SDK 1.6). But since they are released independently, setting WindowsSdkPackageVersion
+    is sometimes necessary for a project to override the version of the Windows SDK projection implied by the 
+    TFM and the current .NET SDK.
+    
+    This file automatically sets WindowsSdkPackageVersion to the appropriate value for compatibility with
+    Windows App SDK 1.6+, eliminating the need for manual project edits.
   -->
 
   <!-- Define minimum required .NET SDK versions for Windows App SDK 1.6+ -->
