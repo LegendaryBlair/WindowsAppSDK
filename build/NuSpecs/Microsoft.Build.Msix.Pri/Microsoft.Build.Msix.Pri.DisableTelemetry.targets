@@ -4,6 +4,17 @@
   <!-- 
     This file disables telemetry for MakePri.exe to prevent errors related to missing 
     Microsoft.VisualStudio.Utilities.Internal assembly when updating the Windows App SDK NuGet package.
+    
+    The error occurs when MakePri.exe tries to use Visual Studio's telemetry functionality but can't
+    find the Microsoft.VisualStudio.Utilities.Internal assembly. This happens specifically when:
+    1. Upgrading the Windows App SDK NuGet package to a newer version
+    2. Building a packaged WinUI3 app
+    
+    The error appears as:
+    error MSB6003: The specified task executable "MakePri.exe" could not be run. 
+    System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.VisualStudio.Utilities.Internal'
+    
+    By disabling telemetry, we avoid the need for the missing assembly and allow the build to succeed.
   -->
   <PropertyGroup>
     <!-- Set environment variable to disable telemetry in MakePri.exe -->
@@ -12,10 +23,13 @@
     <_MakePriDisableTelemetry>true</_MakePriDisableTelemetry>
   </PropertyGroup>
 
-  <Target Name="DisableMakePriTelemetry" BeforeTargets="MakePri">
+  <Target Name="DisableMakePriTelemetry" BeforeTargets="MakePri;GeneratePriFile;_GenerateProjectPriFile">
     <PropertyGroup>
       <!-- Set environment variable through MSBuild -->
       <_MakePriEnvVars>MAKEPRI_DISABLE_TELEMETRY=1;$(_MakePriEnvVars)</_MakePriEnvVars>
     </PropertyGroup>
+    
+    <!-- Add a warning message to inform developers that telemetry has been disabled to prevent errors -->
+    <Message Text="Windows App SDK: Disabling MakePri.exe telemetry to prevent assembly loading errors during build." Importance="low" />
   </Target>
 </Project>
