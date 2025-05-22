@@ -178,6 +178,22 @@ In-box components will be supported forever in the usual way. We have no plans t
 (remove their usability) at this time. We will likely slow down or pause investment in
 the in-box components while we focus on making the Windows App SDK surface complete.
 
+## How do I create a trimmed MSIX bundle that works with Windows App SDK?
+
+When publishing a .NET application as an MSIX bundle with trimming enabled (PublishTrimmed=true), you might encounter issues with the Windows App SDK initialization. This is because the trimming process might remove methods that Windows App SDK relies on, such as `Environment.SetEnvironmentVariable`.
+
+Starting with Windows App SDK 1.5.5 (version 1.5.240627000) and newer, the Windows App SDK has been updated to handle trimmed applications gracefully. If you're using an older version, you might need to add the following settings to your project file:
+
+```xml
+<PropertyGroup>
+  <PublishTrimmed>false</PublishTrimmed>
+  <PublishReadyToRun>True</PublishReadyToRun>
+  <WindowsAppSDKSelfContained>True</WindowsAppSDKSelfContained>
+</PropertyGroup>
+```
+
+If you need to use trimming for size optimization, ensure you're using the latest version of Windows App SDK, which includes compatibility improvements for trimmed applications.
+
 ## I don't see my question here!
 
 [Create an issue to ask a question or start a discussion](https://github.com/microsoft/WindowsAppSDK/issues/new/choose).
