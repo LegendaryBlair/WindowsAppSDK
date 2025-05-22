@@ -16,6 +16,14 @@
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.WindowsAppSDK.AutoInitializerCommon.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.WindowsAppSDK.AutoInitializer.CS.targets" Condition="'$(WindowsAppSdkAutoInitialize)' == 'true'"/>
   
+  <!-- Set TargetPlatformMinVersion from SupportedOSPlatformVersion if not already set -->
+  <Target Name="WindowsAppSDKSetTargetPlatformMinVersion" BeforeTargets="BeforeGenerateCurrentProjectAppxManifest">
+    <PropertyGroup>
+      <!-- If TargetPlatformMinVersion is not set but SupportedOSPlatformVersion is, use SupportedOSPlatformVersion -->
+      <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == '' AND '$(SupportedOSPlatformVersion)' != ''">$(SupportedOSPlatformVersion)</TargetPlatformMinVersion>
+    </PropertyGroup>
+  </Target>
+  
   <ItemGroup>
     <Compile Condition="'$(WindowsAppSDKAggregatePackage)' == 'true' and '$(WindowsAppSdkIncludeVersionInfo)'=='true'" Include="$(MSBuildThisFileDirectory)..\include\WindowsAppSDK-VersionInfo.cs" />
   </ItemGroup>

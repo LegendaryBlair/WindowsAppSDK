@@ -178,6 +178,10 @@ In-box components will be supported forever in the usual way. We have no plans t
 (remove their usability) at this time. We will likely slow down or pause investment in
 the in-box components while we focus on making the Windows App SDK surface complete.
 
+## How does Windows App SDK handle SupportedOSPlatformVersion and TargetPlatformMinVersion?
+
+When using Windows App SDK with .NET projects that set both `TargetFramework` (like net8.0-windows10.0.22621.0) and `SupportedOSPlatformVersion` (like 10.0.19041.0), Windows App SDK will ensure that `TargetPlatformMinVersion` is set to match `SupportedOSPlatformVersion` if `TargetPlatformMinVersion` is not explicitly defined. This ensures that your app can be installed on all operating system versions that you've indicated support for via `SupportedOSPlatformVersion`, rather than just the OS version specified in `TargetFramework`.
+
 ## I don't see my question here!
 
 [Create an issue to ask a question or start a discussion](https://github.com/microsoft/WindowsAppSDK/issues/new/choose).
