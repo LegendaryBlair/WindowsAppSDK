@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT License. See LICENSE in the project root for license information. -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- 
+    This targets file is responsible for handling C#/WinRT compatibility settings for WindowsAppSDK.
+    It sets default values for WindowsSdkPackageVersion and checks for appropriate TFM configuration.
+    
+    Background:
+    C#/WinRT is used to generate .NET projection assemblies for both Windows App SDK and the Windows SDK.
+    On occasion, these must be updated together to maintain compatibility (e.g., with the introduction of 
+    AOT support in Windows App SDK 1.6). But since they are released independently, setting WindowsSdkPackageVersion
+    is sometimes necessary for a project to override the version of the Windows SDK projection implied by the 
+    TFM and the current .NET SDK.
+    
+    This file automatically sets WindowsSdkPackageVersion to the appropriate value for compatibility with
+    Windows App SDK 1.6+, eliminating the need for manual project edits.
+    
+    The default is constructed from two properties that can be overridden:
+    - WindowsAppSDKDefaultSdkVersion: The base Windows SDK version (default: 10.0.17763)
+    - WindowsAppSDKCsWinRTProjectionVersion: The projection version suffix (default: from CsWinRTDependencyWindowsSdkVersionSuffixPackageVersion or 38 as fallback)
+  -->
+
+  <!-- Define minimum required .NET SDK versions for Windows App SDK 1.6+ -->
+  <PropertyGroup>
+    <WindowsAppSDKMinimumNetCoreVersion>6.0.0</WindowsAppSDKMinimumNetCoreVersion>
+  </PropertyGroup>
+  
+  <!-- 
+    Set default WindowsSdkPackageVersion if not already specified.
+    This is specifically needed for AOT compatibility between Windows App SDK 1.6+ and Windows SDK.
+  -->
+  <PropertyGroup>
+    <!-- Define default OS version and projection suffix separately for more flexibility -->
+    <WindowsAppSDKDefaultSdkVersion Condition="'$(WindowsAppSDKDefaultSdkVersion)' == ''">10.0.17763</WindowsAppSDKDefaultSdkVersion>
+    <WindowsAppSDKCsWinRTProjectionVersion Condition="'$(WindowsAppSDKCsWinRTProjectionVersion)' == ''">$(CsWinRTDependencyWindowsSdkVersionSuffixPackageVersion)</WindowsAppSDKCsWinRTProjectionVersion>
+    <!-- Fallback to a known compatible version if the projection version is not defined -->
+    <WindowsAppSDKCsWinRTProjectionVersion Condition="'$(WindowsAppSDKCsWinRTProjectionVersion)' == ''">38</WindowsAppSDKCsWinRTProjectionVersion>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(WindowsSdkPackageVersion)' == '' And '$(MSBuildProjectExtension)' == '.csproj'">
+    <!-- Default to the Windows SDK version that is compatible with the current Windows App SDK -->
+    <WindowsSdkPackageVersion>$(WindowsAppSDKDefaultSdkVersion).$(WindowsAppSDKCsWinRTProjectionVersion)</WindowsSdkPackageVersion>
+  </PropertyGroup>
+  
+  <!-- Validate TFM configuration is compatible with Windows App SDK -->
+  <Target Name="WindowsAppSDKValidateTFMCompatibility" BeforeTargets="BeforeBuild" Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+    <PropertyGroup>
+      <_HasWindowsTFM>false</_HasWindowsTFM>
+      <_HasWindowsTFM Condition="$(TargetFramework.Contains('-windows'))">true</_HasWindowsTFM>
+    </PropertyGroup>
+    
+    <Warning 
+      Text="Windows App SDK requires a Windows-specific TFM (e.g., net6.0-windows10.0.19041.0). Your current TargetFramework is '$(TargetFramework)'."
+      Condition="'$(TargetFramework)' != '' And '$(_HasWindowsTFM)' == 'false'" />
+  </Target>
+</Project>
