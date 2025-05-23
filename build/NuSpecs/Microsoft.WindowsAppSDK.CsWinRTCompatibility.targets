@@ -14,6 +14,10 @@
     
     This file automatically sets WindowsSdkPackageVersion to the appropriate value for compatibility with
     Windows App SDK 1.6+, eliminating the need for manual project edits.
+    
+    The default is constructed from two properties that can be overridden:
+    - WindowsAppSDKDefaultSdkVersion: The base Windows SDK version (default: 10.0.17763)
+    - WindowsAppSDKCsWinRTProjectionVersion: The projection version suffix (default: from CsWinRTDependencyWindowsSdkVersionSuffixPackageVersion or 38 as fallback)
   -->
 
   <!-- Define minimum required .NET SDK versions for Windows App SDK 1.6+ -->
@@ -25,9 +29,17 @@
     Set default WindowsSdkPackageVersion if not already specified.
     This is specifically needed for AOT compatibility between Windows App SDK 1.6+ and Windows SDK.
   -->
+  <PropertyGroup>
+    <!-- Define default OS version and projection suffix separately for more flexibility -->
+    <WindowsAppSDKDefaultSdkVersion Condition="'$(WindowsAppSDKDefaultSdkVersion)' == ''">10.0.17763</WindowsAppSDKDefaultSdkVersion>
+    <WindowsAppSDKCsWinRTProjectionVersion Condition="'$(WindowsAppSDKCsWinRTProjectionVersion)' == ''">$(CsWinRTDependencyWindowsSdkVersionSuffixPackageVersion)</WindowsAppSDKCsWinRTProjectionVersion>
+    <!-- Fallback to a known compatible version if the projection version is not defined -->
+    <WindowsAppSDKCsWinRTProjectionVersion Condition="'$(WindowsAppSDKCsWinRTProjectionVersion)' == ''">38</WindowsAppSDKCsWinRTProjectionVersion>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(WindowsSdkPackageVersion)' == '' And '$(MSBuildProjectExtension)' == '.csproj'">
     <!-- Default to the Windows SDK version that is compatible with the current Windows App SDK -->
-    <WindowsSdkPackageVersion>10.0.17763.38</WindowsSdkPackageVersion>
+    <WindowsSdkPackageVersion>$(WindowsAppSDKDefaultSdkVersion).$(WindowsAppSDKCsWinRTProjectionVersion)</WindowsSdkPackageVersion>
   </PropertyGroup>
   
   <!-- Validate TFM configuration is compatible with Windows App SDK -->
